@@ -3,22 +3,12 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const initSqlJs = require('sql.js');
-const nodemailer = require('nodemailer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const DB_FILE = path.join(__dirname, 'database.db');
 
-const SENDER_EMAIL = 'robopikapika@gmail.com';
-const APP_PASSWORD = 'sdpz hysz ggfi rctj';
-
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: SENDER_EMAIL,
-    pass: APP_PASSWORD
-  }
-});
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz8lASoWALg7oTee6WM4TG6D5oWoR-PGRtoiAiUFdv97xKO3yvJHfr_Yr3L2gG56F8v/exec';
 
 const verificationCodes = {};
 
@@ -75,25 +65,28 @@ async function initDatabase() {
   console.log('Connected to SQLite (sql.js) database.');
 }
 
-app.post('/api/send-code', function(req, res) {
+app.post('/api/send-code', async function(req, res) {
   const email = req.body.email;
   const code = Math.floor(1000 + Math.random() * 9000).toString();
   verificationCodes[email] = code;
 
-  const mailOptions = {
-    from: '"Pika Robot" <' + SENDER_EMAIL + '>',
-    to: email,
-    subject: 'Pika - Email Verification Code',
-    text: 'Welcome to Pika! Your verification code is: ' + code
-  };
+  try {
+    const response = await fetch(GOOGLE_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, code: code })
+    });
 
-  transporter.sendMail(mailOptions, function(err) {
-    if (err) {
-      console.error('Email Error:', err);
+    const data = await response.json();
+    if (!data.success) {
       return res.status(500).json({ success: false, message: 'Failed to send verification email!' });
     }
+
     res.json({ success: true });
-  });
+  } catch (err) {
+    console.error('Email Error:', err);
+    res.status(500).json({ success: false, message: 'Failed to send verification email!' });
+  }
 });
 
 app.post('/api/register', function(req, res) {
