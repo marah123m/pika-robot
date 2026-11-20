@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pika | Smart Companion Robot</title>
+  <style>
+    :root {
+      --bg-dark: #130b24;
+      --bg-card: #1f1238;
+      --bg-input: #2b1a4d;
+      --gold: #facc15;
+      --gold-hover: #eab308;
+      --mauve: #c084fc;
+      --mauve-soft: rgba(192, 132, 252, 0.15);
+      --text-main: #f8fafc;
+      --text-muted: #cbd5e1;
+      --danger: #fda4af;
+      --success: #4ade80;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top, #271549 0%, var(--bg-dark) 75%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 25px 15px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 780px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1.5px solid rgba(250, 204, 21, 0.35);
+      border-radius: 26px;
+      padding: 30px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(192, 132, 252, 0.12);
+      animation: fadeUp 0.6s ease-out;
+    }
+
+    .hidden { display: none !important; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes floatMascot {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-7px) rotate(2deg); }
+    }
+
+    .mascot-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 14px;
+      position: relative;
+    }
+
+    .speech-bubbles {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 8px;
+      width: 240px;
+      justify-content: flex-start;
+    }
+
+    .bubble {
+      background: linear-gradient(135deg, var(--gold), #f59e0b);
+      color: #130b24;
+      font-weight: 800;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      box-shadow: 0 4px 15px rgba(250, 204, 21, 0.4);
+      position: relative;
+    }
+
+    .mascot-avatar {
+      width: 115px;
+      height: 115px;
+      animation: floatMascot 3.2s ease-in-out infinite;
+      filter: drop-shadow(0 10px 20px rgba(250, 204, 21, 0.35));
+    }
+
+    h1, h2, h3 {
+      color: var(--gold);
+      margin-top: 0;
+    }
+
+    .center-text { text-align: center; }
+
+    .robot-tagline {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.5;
+      max-width: 520px;
+      margin: -8px auto 20px auto;
+      padding: 8px 14px;
+      background: rgba(192, 132, 252, 0.08);
+      border-radius: 12px;
+      border: 1px solid rgba(192, 132, 252, 0.2);
+    }
+
+    .serial-box {
+      background: rgba(250, 204, 21, 0.08);
+      border: 1.5px dashed var(--gold);
+      border-radius: 16px;
+      padding: 14px;
+      text-align: center;
+      margin-bottom: 22px;
+    }
+
+    .serial-code {
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--gold);
+      letter-spacing: 2px;
+      display: block;
+      margin: 4px 0;
+    }
+
+    .remember-note {
+      color: var(--danger);
+      font-size: 13px;
+      font-weight: bold;
+      margin: 0;
+    }
+
+    .tabs {
+      display: flex;
+      background: var(--bg-input);
+      border-radius: 14px;
+      padding: 5px;
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 11px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-weight: bold;
+      font-size: 15px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--mauve), #9333ea);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(192, 132, 252, 0.3);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+      color: var(--mauve);
+      font-weight: 600;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(192, 132, 252, 0.3);
+      background: var(--bg-input);
+      color: #fff;
+      font-size: 15px;
+      outline: none;
+      transition: 0.25s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.15);
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--gold), #f59e0b);
+      color: #130b24;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0 6px 20px rgba(250, 204, 21, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: var(--gold-hover);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: var(--mauve-soft);
+      border: 1px solid var(--mauve);
+      color: var(--mauve);
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.25s;
+    }
+
+    .btn-secondary:hover {
+      background: var(--mauve);
+      color: #130b24;
+    }
+
+    .member-card {
+      background: var(--bg-input);
+      border: 1px solid rgba(250, 204, 21, 0.25);
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      animation: fadeUp 0.4s ease-out;
+    }
+
+    .member-avatar-box {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--mauve), var(--gold));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      flex-shrink: 0;
+      border: 2px solid var(--gold);
+    }
+
+    .member-info { flex: 1; }
+    .member-info h4 { margin: 0 0 6px 0; color: var(--gold); font-size: 17px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+    .member-info p { margin: 3px 0; font-size: 13px; color: var(--text-muted); }
+
+    .badge {
+      display: inline-block;
+      background: rgba(192, 132, 252, 0.2);
+      color: var(--mauve);
+      padding: 2px 10px;
+      border-radius: 10px;
+      font-size: 12px;
+    }
+
+    .badge.gold {
+      background: rgba(250, 204, 21, 0.18);
+      color: var(--gold);
+      border: 1px solid rgba(250, 204, 21, 0.4);
+    }
+
+    .verify-box {
+      background: rgba(74, 222, 128, 0.1);
+      border: 1px solid var(--success);
+      border-radius: 14px;
+      padding: 16px;
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 14px;
+    }
+
+    @media (max-width: 600px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <div id="step1Auth" class="card">
+    <div class="mascot-wrapper">
+      <div class="speech-bubbles">
+        <span class="bubble">Welcome! ⚡</span>
+      </div>
+      <svg class="mascot-avatar" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M32 38L18 10L46 28Z" fill="#FACC15" stroke="#9333EA" stroke-width="3"/>
+        <path d="M88 38L102 10L74 28Z" fill="#FACC15" stroke="#9333EA" stroke-width="3"/>
+        <path d="M23 16L18 10L28 19Z" fill="#130B24"/>
+        <path d="M97 16L102 10L92 19Z" fill="#130B24"/>
+        <circle cx="60" cy="66" r="40" fill="#FACC15" stroke="#C084FC" stroke-width="3"/>
+        <circle cx="45" cy="58" r="6" fill="#130B24"/>
+        <circle cx="47" cy="56" r="2" fill="#FFFFFF"/>
+        <circle cx="75" cy="58" r="6" fill="#130B24"/>
+        <circle cx="77" cy="56" r="2" fill="#FFFFFF"/>
+        <circle cx="34" cy="70" r="6" fill="#F43F5E" opacity="0.85"/>
+        <circle cx="86" cy="70" r="6" fill="#F43F5E" opacity="0.85"/>
+        <path d="M52 72Q60 80 68 72" stroke="#130B24" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <h1 class="center-text" style="margin-bottom: 12px; letter-spacing: 2px;">Pika</h1>
+    <p class="robot-tagline">
+      An interactive AI companion robot designed to nurture positive behavior, support child development, and adapt to every family member's unique personality and needs.
+    </p>
+
+    <div class="serial-box">
+      <span style="font-size: 13px; color: var(--text-muted);">Robot Registry Serial ID</span>
+      <span id="displaySerial" class="serial-code">PIKA-2026-0000</span>
+      <p class="remember-note">⚠️ Remember that! Keep this ID to link your robot to your account.</p>
+    </div>
+
+    <div class="tabs">
+      <button id="tabRegister" class="tab-btn active" onclick="switchAuthMode('register')">Create Account</button>
+      <button id="tabLogin" class="tab-btn" onclick="switchAuthMode('login')">Log In</button>
+    </div>
+
+    <div id="registerForm">
+      <label>Username (Parent / Guardian)</label>
+      <input type="text" id="regUsername" placeholder="e.g., Alex Morgan" />
+
+      <label>Email Address</label>
+      <input type="email" id="regEmail" placeholder="name@example.com" />
+
+      <div class="grid-2">
+        <div>
+          <label>Password</label>
+          <input type="password" id="regPassword" placeholder="••••••••" />
+        </div>
+        <div>
+          <label>Serial ID (Auto-Assigned)</label>
+          <input type="text" id="regSerialInput" readonly style="color: var(--gold); font-weight: bold; text-align: center;" />
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="startEmailVerification()">Next ➔</button>
+    </div>
+
+    <div id="loginForm" class="hidden">
+      <label>Email Address</label>
+      <input type="email" id="loginEmail" placeholder="name@example.com" />
+
+      <div class="grid-2">
+        <div>
+          <label>Password</label>
+          <input type="password" id="loginPassword" placeholder="••••••••" />
+        </div>
+        <div>
+          <label>Serial ID</label>
+          <input type="text" id="loginSerial" placeholder="PIKA-XXXX-XXX" />
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="handleLogin()">Log In (Next) ➔</button>
+    </div>
+
+    <div id="emailVerifySection" class="verify-box hidden">
+      <p style="margin: 0 0 10px 0; color: var(--success); font-weight: bold;">
+        ✉️ Verification code sent to your email! Please check your inbox.
+      </p>
+      <div style="display: flex; gap: 10px; max-width: 340px; margin: 0 auto;">
+        <input type="text" id="verifyCodeInput" placeholder="Enter 4-digit code" style="margin: 0; text-align: center;" />
+        <button class="btn-primary" style="width: auto; padding: 0 22px;" onclick="confirmVerification()">Verify</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="step2Family" class="card hidden">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;">
+      <div>
+        <h2 style="margin: 0;">👨‍👩‍👧‍👦 Family & Robot Setup</h2>
+        <span style="font-size: 13px; color: var(--mauve);">Linked Serial: <strong id="activeSerialHeader" style="color: var(--gold);"></strong></span>
+      </div>
+      <button class="btn-secondary" onclick="logout()">Log Out</button>
+    </div>
+
+    <div style="background: rgba(250, 204, 21, 0.08); border: 1px solid var(--gold); border-radius: 18px; padding: 18px; margin-bottom: 20px;">
+      <h3 style="font-size: 16px; margin-bottom: 12px;">🤖 Robot Name & Default Personality</h3>
+      <div class="grid-2">
+        <div>
+          <label>Robot Custom Name</label>
+          <input type="text" id="robotCustomName" placeholder="e.g., Pika, Sparky, Atlas..." style="margin-bottom: 0;" onchange="saveRobotConfig()" />
+        </div>
+        <div>
+          <label>Default Interaction Style</label>
+          <select id="robotPersona" style="margin-bottom: 0;" onchange="saveRobotConfig()">
+            <option value="Cute & Gentle 🥰">Cute & Gentle 🥰</option>
+            <option value="Sarcastic & Roaster 😎">Sarcastic & Roaster 😎</option>
+            <option value="Grumpy & Strict 😤">Grumpy & Strict 😤</option>
+            <option value="Calm & Wise 🦉">Calm & Wise 🦉</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <button id="showAddFormBtn" class="btn-primary" style="margin-bottom: 20px;" onclick="toggleMemberForm(true)">
+      ➕ Add New Person
+    </button>
+
+    <div id="addMemberForm" class="hidden" style="background: rgba(43, 26, 77, 0.7); border: 1px solid var(--mauve); border-radius: 18px; padding: 20px; margin-bottom: 22px;">
+      <h3 style="font-size: 17px;">📝 New Family Member Details</h3>
+
+      <div class="grid-3">
+        <div>
+          <label>Full Name</label>
+          <input type="text" id="mName" placeholder="e.g., Maya / Leo" />
+        </div>
+        <div>
+          <label>Gender</label>
+          <select id="mGender">
+            <option value="Female">Female 👧</option>
+            <option value="Male">Male 👦</option>
+          </select>
+        </div>
+        <div>
+          <label>Age (Years)</label>
+          <input type="number" id="mAge" min="1" max="110" placeholder="e.g., 8" />
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <label>Religion / Values</label>
+          <select id="mReligion">
+            <option value="Islam">Islam</option>
+            <option value="Christianity">Christianity</option>
+            <option value="General / Universal Values">General / Universal Values</option>
+          </select>
+        </div>
+        <div>
+          <label>Profile Photo (Face Recognition)</label>
+          <input type="file" id="mPhoto" accept="image/*" style="padding: 9px;" />
+        </div>
+      </div>
+
+      <label>🎭 Robot Persona for This Person</label>
+      <select id="mPersona">
+        <option value="Cute & Gentle 🥰">Cute & Gentle 🥰</option>
+        <option value="Sarcastic & Roaster 😎">Sarcastic & Roaster 😎</option>
+        <option value="Grumpy & Strict 😤">Grumpy & Strict 😤</option>
+        <option value="Calm & Wise 🦉">Calm & Wise 🦉</option>
+      </select>
+
+      <label>🎙️ Voice Sample (10s Real Mic Check)</label>
+      <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap;">
+        <button type="button" id="recordBtn" class="btn-secondary" onclick="recordRealVoice()">🔴 Record 10s Voice Sample</button>
+        <span id="voiceStatus" style="font-size: 13px; color: var(--text-muted);">Not recorded yet</span>
+      </div>
+
+      <label>🩺 Health Constraints & Allergies</label>
+      <input type="text" id="mHealth" placeholder="e.g., Peanut allergy, mild asthma, or None" />
+
+      <label>🌟 Behavioral Standards & Educational Goals</label>
+      <textarea id="mBehavior" rows="2" placeholder="e.g., Encourage study time, gently remind when shouting, promote honesty..."></textarea>
+
+      <div style="display: flex; gap: 10px;">
+        <button class="btn-primary" onclick="saveFamilyMember()">💾 Save Person</button>
+        <button type="button" class="btn-secondary" onclick="toggleMemberForm(false)">Cancel</button>
+      </div>
+    </div>
+
+    <div id="membersList"></div>
+
+    <div id="finishSection" class="hidden" style="margin-top: 20px; text-align: center;">
+      <button class="btn-primary" style="background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff;" onclick="syncAllData()">
+        🚀 Save & Sync with Robot
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function generateSerial() {
+    const rand = Math.floor(1000 + Math.random() * 9000);
+    const timePart = Date.now().toString().slice(-3);
+    return 'PIKA-' + rand + '-' + timePart;
+  }
+
+  let currentSerial = localStorage.getItem('pika_serial') || generateSerial();
+  document.getElementById('displaySerial').textContent = currentSerial;
+  document.getElementById('regSerialInput').value = currentSerial;
+
+  function switchAuthMode(mode) {
+    document.getElementById('emailVerifySection').classList.add('hidden');
+    if (mode === 'register') {
+      document.getElementById('tabRegister').classList.add('active');
+      document.getElementById('tabLogin').classList.remove('active');
+      document.getElementById('registerForm').classList.remove('hidden');
+      document.getElementById('loginForm').classList.add('hidden');
+    } else {
+      document.getElementById('tabLogin').classList.add('active');
+      document.getElementById('tabRegister').classList.remove('active');
+      document.getElementById('loginForm').classList.remove('hidden');
+      document.getElementById('registerForm').classList.add('hidden');
+    }
+  }
+
+  async function startEmailVerification() {
+    const user = document.getElementById('regUsername').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const pass = document.getElementById('regPassword').value.trim();
+
+    if (!user || !email || !pass) {
+      alert('Please fill in your username, email, and password first.');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/send-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        document.getElementById('emailVerifySection').classList.remove('hidden');
+        alert('Verification code sent to ' + email);
+      } else {
+        alert(data.message || 'Could not send email!');
+      }
+    } catch (err) {
+      alert('Cannot connect to server! Make sure node app.js is running.');
+    }
+  }
+
+  async function confirmVerification() {
+    const code = document.getElementById('verifyCodeInput').value.trim();
+    if (!code) {
+      alert('Please enter the verification code from your email.');
+      return;
+    }
+
+    const payload = {
+      serial_id: currentSerial,
+      username: document.getElementById('regUsername').value.trim(),
+      email: document.getElementById('regEmail').value.trim(),
+      password: document.getElementById('regPassword').value.trim(),
+      code: code
+    };
+
+    try {
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+
+      if (!data.success) {
+        alert(data.message || 'Verification failed!');
+        return;
+      }
+      localStorage.setItem('pika_serial', currentSerial);
+      localStorage.setItem('pika_logged_in', 'true');
+      goToStep2();
+    } catch (err) {
+      alert('Cannot connect to server!');
+    }
+  }
+
+  async function handleLogin() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value.trim();
+
+    if (!email || !password) {
+      alert('Please enter your email and password.');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, password: password })
+      });
+      const data = await res.json();
+
+      if (!data.success) {
+        alert(data.message || 'Invalid email or password!');
+        return;
+      }
+
+      currentSerial = data.user.serial_id;
+      localStorage.setItem('pika_serial', currentSerial);
+      localStorage.setItem('pika_logged_in', 'true');
+      goToStep2();
+    } catch (err) {
+      alert('Cannot connect to server! Make sure node app.js is running.');
+    }
+  }
+
+  async function goToStep2() {
+    document.getElementById('step1Auth').classList.add('hidden');
+    document.getElementById('step2Family').classList.remove('hidden');
+    document.getElementById('activeSerialHeader').textContent = currentSerial;
+    await loadFromServer();
+  }
+
+  async function loadFromServer() {
+    try {
+      const res = await fetch('/api/robot-data/' + currentSerial);
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('robotCustomName').value = data.robot.robot_name || 'Pika';
+        document.getElementById('robotPersona').value = data.robot.default_persona || 'Cute & Gentle 🥰';
+        renderMembers(data.family_members);
+      }
+    } catch (err) {
+      console.error('Error loading from server:', err);
+    }
+  }
+
+  function logout() {
+    localStorage.removeItem('pika_logged_in');
+    localStorage.removeItem('pika_serial');
+    location.reload();
+  }
+
+  async function saveRobotConfig() {
+    const robot_name = document.getElementById('robotCustomName').value.trim() || 'Pika';
+    const default_persona = document.getElementById('robotPersona').value;
+
+    await fetch('/api/robot-config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        serial_id: currentSerial,
+        robot_name: robot_name,
+        default_persona: default_persona
+      })
+    });
+  }
+
+  let voiceRecorded = false;
+
+  function toggleMemberForm(show) {
+    const form = document.getElementById('addMemberForm');
+    if (show) {
+      form.classList.remove('hidden');
+      voiceRecorded = false;
+      document.getElementById('voiceStatus').textContent = 'Not recorded yet';
+      document.getElementById('voiceStatus').style.color = 'var(--text-muted)';
+      document.getElementById('mPersona').value = document.getElementById('robotPersona').value;
+    } else {
+      form.classList.add('hidden');
+    }
+  }
+
+  async function recordRealVoice() {
+    const btn = document.getElementById('recordBtn');
+    const status = document.getElementById('voiceStatus');
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert('Your browser does not support microphone recording.');
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioContext.createMediaStreamSource(stream);
+      const analyser = audioContext.createAnalyser();
+      analyser.fftSize = 256;
+      source.connect(analyser);
+
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      let maxVolume = 0;
+      let secondsLeft = 10;
+
+      btn.disabled = true;
+      voiceRecorded = false;
+      status.style.color = 'var(--gold)';
+      status.textContent = '🎙️ Speak now... (' + secondsLeft + 's left)';
+
+      const volumeChecker = setInterval(function() {
+        analyser.getByteFrequencyData(dataArray);
+        let sum = 0;
+        for (let i = 0; i < dataArray.length; i++) {
+          sum += dataArray[i];
+        }
+        const avg = sum / dataArray.length;
+        if (avg > maxVolume) {
+          maxVolume = avg;
+        }
+      }, 100);
+
+      const countdown = setInterval(function() {
+        secondsLeft--;
+        if (secondsLeft > 0) {
+          status.textContent = '🎙️ Speak now... (' + secondsLeft + 's left)';
+        }
+      }, 1000);
+
+      setTimeout(function() {
+        clearInterval(volumeChecker);
+        clearInterval(countdown);
+        stream.getTracks().forEach(function(track) { track.stop(); });
+        audioContext.close();
+        btn.disabled = false;
+
+        if (maxVolume > 12) {
+          voiceRecorded = true;
+          status.textContent = '✅ Voice sample captured successfully!';
+          status.style.color = 'var(--success)';
+        } else {
+          voiceRecorded = false;
+          status.textContent = '❌ No voice detected! Please speak louder and try again.';
+          status.style.color = 'var(--danger)';
+          alert('No speech detected during the 10 seconds. Please speak into the microphone and try again.');
+        }
+      }, 10000);
+
+    } catch (err) {
+      btn.disabled = false;
+      status.textContent = '⚠️ Microphone permission denied.';
+      status.style.color = 'var(--danger)';
+      alert('Please allow microphone access in your browser to record voice samples.');
+    }
+  }
+
+  function getAvatarByAgeAndGender(age, gender) {
+    const numAge = parseInt(age);
+    if (numAge <= 3) return '👶';
+    if (gender === 'Female') {
+      if (numAge <= 16) return '👧';
+      if (numAge <= 55) return '👩';
+      return '👵';
+    } else {
+      if (numAge <= 16) return '👦';
+      if (numAge <= 55) return '🧔';
+      return '👴';
+    }
+  }
+
+  async function saveFamilyMember() {
+    const name = document.getElementById('mName').value.trim();
+    const gender = document.getElementById('mGender').value;
+    const age = document.getElementById('mAge').value.trim();
+    const religion = document.getElementById('mReligion').value;
+    const persona = document.getElementById('mPersona').value;
+    const health = document.getElementById('mHealth').value.trim() || 'No health constraints';
+    const behavior = document.getElementById('mBehavior').value.trim() || 'Balanced general behavior';
+
+    if (!name || !age) {
+      alert('Please enter at least the person name and age.');
+      return;
+    }
+
+    const newMember = {
+      serial_id: currentSerial,
+      name: name,
+      gender: gender,
+      age: parseInt(age),
+      religion: religion,
+      persona: persona,
+      health: health,
+      behavior: behavior,
+      voice_status: voiceRecorded ? 'Recorded ✅' : 'Not recorded ⚠️',
+      avatar: getAvatarByAgeAndGender(age, gender)
+    };
+
+    try {
+      const res = await fetch('/api/members', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newMember)
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('mName').value = '';
+        document.getElementById('mAge').value = '';
+        document.getElementById('mHealth').value = '';
+        document.getElementById('mBehavior').value = '';
+        toggleMemberForm(false);
+        await loadFromServer();
+      } else {
+        alert('Error saving member: ' + (data.error || 'Unknown error'));
+      }
+    } catch (err) {
+      alert('Server connection error: ' + err.message);
+    }
+  }
+
+  async function deleteMember(id) {
+    await fetch('/api/members/' + id, { method: 'DELETE' });
+    await loadFromServer();
+  }
+
+  function renderMembers(members) {
+    const list = document.getElementById('membersList');
+    const finishBtn = document.getElementById('finishSection');
+
+    if (!members || members.length === 0) {
+      list.innerHTML = '<p class="center-text" style="color: var(--text-muted); padding: 20px;">No family members added yet. Click "Add New Person" to get started.</p>';
+      finishBtn.classList.add('hidden');
+      return;
+    }
+
+    finishBtn.classList.remove('hidden');
+    list.innerHTML = members.map(function(m) {
+      return '<div class="member-card">' +
+        '<div class="member-avatar-box">' + m.avatar + '</div>' +
+        '<div class="member-info">' +
+          '<h4>' + m.name +
+            ' <span class="badge">' + (m.gender || 'Member') + '</span>' +
+            ' <span class="badge">' + m.age + ' yrs</span>' +
+            ' <span class="badge">' + m.religion + '</span>' +
+            ' <span class="badge gold">🎭 ' + (m.persona || 'Cute & Gentle 🥰') + '</span>' +
+          '</h4>' +
+          '<p>🎙️ Voice Print: <strong>' + m.voice_status + '</strong></p>' +
+          '<p>🩺 Health: ' + m.health + '</p>' +
+          '<p>🌟 Behavior: ' + m.behavior + '</p>' +
+        '</div>' +
+        '<button class="btn-secondary" style="border-color: var(--danger); color: var(--danger); padding: 6px 12px;" onclick="deleteMember(' + m.id + ')">Delete</button>' +
+      '</div>';
+    }).join('');
+  }
+
+  async function syncAllData() {
+    await saveRobotConfig();
+    const rName = document.getElementById('robotCustomName').value.trim() || 'Pika';
+    alert('✅ All data saved to database.db and ready for "' + rName + '"!\nRobot API URL: /api/robot-data/' + currentSerial);
+  }
+
+  if (localStorage.getItem('pika_logged_in') === 'true') {
+    goToStep2();
+  }
+</script>
+
+</body>
+</html>

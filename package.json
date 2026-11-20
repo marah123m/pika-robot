@@ -1,0 +1,19 @@
+{
+  "name": "pika-robot",
+  "version": "1.0.0",
+  "description": "Pika Smart Companion Robot Portal",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.3.0",
+    "nodemailer": "^10.6.0",
+    "sqlite3": "^6.0.1"
+  }
+}
