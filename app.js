@@ -8,7 +8,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const DB_FILE = path.join(__dirname, 'database.db');
 
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz8lASoWALg7oTee6WM4TG6D5oWoR-PGRtoiAiUFdv97xKO3yvJHfr_Yr3L2gG56F8v/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz8IASoWALg7oTee6WM4TG6D5oWoR-PGRtoiAiUFdv97xKO3yVJHfr_Yr3L2gG56F8v/exec';
 
 const verificationCodes = {};
 
