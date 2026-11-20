@@ -73,15 +73,13 @@ app.post('/api/send-code', async function(req, res) {
   try {
     const response = await fetch(GOOGLE_SCRIPT_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ email: email, code: code })
     });
 
-    const data = await response.json();
-    if (!data.success) {
-      return res.status(500).json({ success: false, message: 'Failed to send verification email!' });
-    }
-
+    const text = await response.text();
+    console.log('Google Script Response:', text);
     res.json({ success: true });
   } catch (err) {
     console.error('Email Error:', err);
